@@ -1,71 +1,791 @@
 ---
-title: Introduction
-description: "Welcome bro to the home of your new documentation"
+
+### **[Page 1]**
+
+## **GYAIN-KMS: The Intelligent Document Management System**
+
+### **Technical & Functional Specification**
+
+**Version:** 2.0  
+**Date:** June 29, 2025  
+**Document Status:** Final Draft
+
+**Prepared for:**  
+Hemant Fulfagar & The Development Team
+
+**Purpose:**  
+This document provides a comprehensive overview of the GYAIN-KMS platform's architecture, features, API, and user interface design. It is intended to serve as the primary technical and functional guide for the development, testing, and administration of the system.
+
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.png"
-  alt="Hero Light"
-/>
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.png"
-  alt="Hero Dark"
-/>
+### **[Page 2]**
 
-## Setting up
+### **Table of Contents**
 
-The first step to world-class documentation is setting up your editing environments.
+**1. Introduction & Core Principles**......................................................................................... **3**  
+    1.1. System Overview  
+    1.2. Core Design Principles  
+    1.3. Target Audience
 
-<CardGroup cols={2}>
-  <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
-  >
-    Get your docs set up locally for easy development
-  </Card>
-  <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
-  >
-    Preview your changes before you push to make sure they're perfect
-  </Card>
-</CardGroup>
+**2. The Intelligent Ingestion Pipeline**.................................................................................... **4**  
+    2.1. Overview of the Document Journey  
+    2.2. The Smart OCR Router (`OCRRule`)  
+    2.3. The Automation Engine: A Two-Pronged Approach
 
-## Make it yours
+**3. The Document Lifecycle & Workflow Engine**................................................................... **6**  
+    3.1. Purpose: Decoupling UI from Business Logic  
+    3.2. Core Components: States, Transitions, and Actions  
+    3.3. API-Driven UI: The "What Can I Do?" and "Do It Now" APIs  
+    3.4. Workflow Notifications
 
-Update your docs to your brand and add valuable content for the best user conversion.
+**4. User Interface (UI) & User Experience (UX) Design**..................................................... **8**  
+    4.1. The "Knowledge Hub": Main Document Screen  
+    4.2. The "Workspace": Single Document Detail View  
+    4.3. The "Share" Modal: Modern Document Permissions  
+    4.4. The AI Assistant Panel in Detail
 
-<CardGroup cols={2}>
-  <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
-  >
-    Customize your docs to your company's colors and brands
-  </Card>
-  <Card
-    title="Reference APIs"
-    icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
-  >
-    Automatically generate endpoints from an OpenAPI spec
-  </Card>
-  <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/content/components/accordions"
-  >
-    Build interactive features and designs to guide your users
-  </Card>
-  <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
-  >
-    Check out our showcase of our favorite documentation
-  </Card>
-</CardGroup>
+**5. Practical Implementation: Scenarios & User Journeys**................................................ **13**  
+    5.1. Introduction for the Team  
+    5.2. Scenario 1: Automated Invoice Processing via Email  
+    5.3. Scenario 2: Direct Consumption of Identity Documents (Passport/Aadhar)  
+    5.4. Scenario 3: End-to-End Journey for a Handwritten Medical Prescription
+
+**6. GYAIN-KMS API Reference Guide (Version 2.0)**....................................................... **16**  
+    6.1. Authentication & Versioning Notes  
+    6.2. Core Document & Version APIs  
+    6.3. Ingestion & Bulk Operations APIs  
+    6.4. Workflow & State Discovery APIs  
+    6.5. Permissions Management API  
+    6.6. Search API (`/api/search/`)  
+    6.7. System, User & Metadata APIs
+
+**7. System Administration & Configuration**....................................................................... **19**  
+    7.1. Django Administration Panel Overview  
+    7.2. Seeded Top-Level Categories  
+    7.3. Admin Setup Guide: Automated Invoice Processing  
+    7.4. Admin Setup Guide: Direct Consumption of Identity Docs  
+    7.5. Admin Setup Guide: Handwritten Medical Prescription Workflow
+
+**8. Platform Policies & Guidelines**..................................................................................... **23**  
+    8.1. Responsible AI and Generative Feature Usage  
+    8.2. Data Privacy and Security
+
+**Appendices**........................................................................................................................ **24**  
+    Appendix A: Database Schema Snippets  
+    Appendix B: Frontend Conceptual Code
+
+---
+
+### **[Page 3]**
+
+### **1. Introduction & Core Principles**
+
+#### **1.1. System Overview**
+
+The GYAIN Knowledge Management System (KMS) is a next-generation, intelligent Document Management System (DMS) designed to automate the entire lifecycle of a document. It moves beyond simple storage and retrieval to provide a powerful, flexible, and scalable platform for processing, classifying, reviewing, and securing enterprise information.
+
+The system is built on a robust backend featuring a sophisticated ingestion pipeline, a dynamic workflow engine, and a comprehensive RESTful API. This is complemented by a modern, state-aware frontend designed for an intuitive and efficient user experience.
+
+#### **1.2. Core Design Principles**
+
+The development and functionality of GYAIN-KMS are guided by several key principles:
+
+*   **Automation First:** Repetitive tasks such as tagging, categorization, and routing should be automated wherever possible using a combination of explicit rules and predictive AI.
+*   **Intelligence at the Core:** The system should make smart decisions, from choosing the best Optical Character Recognition (OCR) tool for a specific document type to suggesting relevant tags based on learned patterns.
+*   **Decoupled & API-Driven:** Business logic (e.g., approval workflows) must be decoupled from the user interface. The UI should be driven entirely by the API, allowing for changes in business processes without requiring frontend code modifications.
+*   **Human-in-the-Loop:** While automation is key, the system must provide clear, intuitive interfaces for human review, correction, and final approval, ensuring data accuracy and compliance.
+*   **Traceability & Auditability:** Every action, from initial ingestion and OCR correction to workflow transitions and permission changes, must be logged to provide a complete and unalterable audit trail.
+
+#### **1.3. Target Audience**
+
+This document is intended for:
+
+*   **Backend & Frontend Developers:** To understand the system architecture, API contracts, and how different components interact.
+*   **System Administrators:** To learn how to configure workflows, ingestion rules, and system settings via the Django Admin panel.
+*   **QA & Testing Teams:** To create test cases based on the defined user journeys and functional specifications.
+*   **Project Managers:** To have a consolidated view of the system's capabilities and features.
+
+---
+
+### **[Page 4]**
+
+### **2. The Intelligent Ingestion Pipeline**
+
+The ingestion pipeline is the entry point for all documents into GYAIN-KMS. It is not a simple file upload mechanism but a multi-stage, intelligent process designed to extract maximum value from a document before a human even sees it.
+
+#### **2.1. Overview of the Document Journey**
+
+1.  **Entry:** A document enters the system via an entry point (e.g., `ApiUpload`, `MailFetch`).
+2.  **OCR Routing:** The system intelligently selects the optimal OCR engine based on pre-defined `OCRRule` configurations.
+3.  **Text Extraction:** The chosen engine extracts the text content from the document.
+4.  **Auto-Classification & Tagging:** A powerful two-pronged engine applies metadata based on both explicit rules and predictive AI.
+5.  **Workflow Initiation:** The document is placed into its designated initial state within a lifecycle workflow, ready for the next step (e.g., human review or immediate activation).
+
+#### **2.2. The Smart OCR Router (`OCRRule`)**
+
+The `OCRRule` system acts as the "brain" of the pre-processing stage. Its purpose is to choose the right tool for the job to ensure the highest quality text extraction, which is fundamental for accurate downstream automation.
+
+**Capabilities:**
+
+*   **Provider Selection:** Dynamically chooses between different OCR engines, such as the local `Tesseract/OCRmyPDF` for standard typed documents or the more powerful `Google Gemini` for complex cases like handwriting.
+*   **Condition-Based Routing:** Rules can be triggered based on various document attributes:
+    *   **By Document Type:** The primary use case. E.g., `IF DocumentType is 'Handwritten Form', THEN use Google Gemini.`
+    *   **By Category:** E.g., `IF Category is 'Medical Records', THEN use Google Gemini.`
+    *   **By Source Path Filter:** For legacy integrations where files are dropped into specific folders.
+*   **Per-Rule Customization:** The `parameters` JSON field allows for highly specific instructions to be sent to the chosen OCR engine.
+
+**Example 1: Language-Specific OCR**
+*   **Rule:** "Process Hindi Documents"
+*   **Provider:** Tesseract / OCRmyPDF
+*   **Condition:** `Category` is "Hindi Invoices"
+*   **Parameters:** `{"language": "hin"}`
+*   **Result:** Tesseract is forced to use its Hindi language pack, drastically improving accuracy.
+
+**Example 2: Context-Aware AI OCR**
+*   **Rule:** "Process Handwritten Forms"
+*   **Provider:** Google Gemini
+*   **Condition:** `DocumentType` is "Handwritten Form"
+*   **Parameters:** `{"prompt": "This is a handwritten medical intake form. Please extract all text fields..."}`
+*   **Result:** A specific, context-aware prompt is sent to Gemini, yielding far superior results than a generic prompt.
+
+---
+
+### **[Page 5]**
+
+#### **2.3. The Automation Engine: A Two-Pronged Approach**
+
+Once high-quality text is extracted, GYAIN-KMS uses a sophisticated, dual-engine approach to automatically apply tags and metadata.
+
+##### **2.3.1. Rule-Based Auto-Tagging (`IngestionWorkflow` System)**
+
+This is the engine for explicit, predictable automation, answering the question: *"When a new document meets these exact criteria, what should I always do?"*
+
+**How It Works:**
+This is configured in the Django Admin via `IngestionWorkflow`, `IngestionTrigger`, and `IngestionAction` models.
+
+*   **The Trigger (The "IF"):** Rules are created based on:
+    *   **Source:** Where the file came from (`ApiUpload`, `MailFetch`).
+    *   **Filename/Path:** Contains "invoice" or comes from the `/finance/` folder.
+    *   **Content:** The document text contains a specific phrase like "Account Number".
+
+*   **The Action (The "THEN"):** If the trigger's conditions are met, the system can:
+    *   **Assign Tags:** Automatically apply one or more tags (e.g., 'Invoice', 'Needs Payment').
+    *   **Assign Metadata:** Automatically set the `Category`, `DocumentType`, and `Owner`.
+    *   **Set Initial State:** Bypass manual review by placing the document directly into a specific workflow state (e.g., "Active" or "Verification Pending").
+
+##### **2.3.2. AI-Based Auto-Tagging (`DocumentClassifier`)**
+
+This is the intelligent, predictive engine, answering the question: *"Based on documents I've seen before, what does this new document look like it should have?"*
+
+**How It Works:**
+This is handled by the `DocumentClassifier` and signal handlers.
+
+*   **Learning (`train_classifier` task):** A background task periodically analyzes all existing, human-classified documents. It learns the statistical correlations between words/phrases in the documents and the tags assigned to them.
+*   **Applying Suggestions (`set_tags` handler):**
+    1.  After a new document is consumed, the `document_consumption_finished` signal is sent.
+    2.  This triggers a handler that first applies any explicit rule-based tags.
+    3.  Then, it calls `classifier.predict_tags(version.content)`.
+    4.  The AI model "reads" the content and returns a list of suggested tags based on its training, which are then applied to the document.
+
+---
+
+### **[Page 6]**
+
+### **3. The Document Lifecycle & Workflow Engine**
+
+After a document is ingested and classified, it enters a lifecycle managed by the powerful and flexible Workflow Engine. This engine governs the states a document can be in and the actions that can be taken to move it from one state to another.
+
+#### **3.1. Purpose: Decoupling UI from Business Logic**
+
+The fundamental design goal of the workflow system is to separate the business approval process from the frontend application code.
+
+*   **The Old Way (Inflexible):** The frontend has hardcoded buttons and logic, e.g., `if (status === 'Draft') { showSubmitButton(); }`. Changing the process requires a new frontend deployment.
+*   **The GYAIN-KMS Way (Flexible):** The frontend has no hardcoded workflow logic. It simply asks the API, "This document is in the 'Draft' state. What can the user do now?" The API provides the list of available actions. This is **API-Driven UI**.
+
+#### **3.2. Core Components: States, Transitions, and Actions**
+
+The entire engine is configured in the Django Admin and built on three core models:
+
+*   **State:** Represents a specific status in a document's lifecycle (e.g., `Draft`, `In Review`, `Active`, `Archived`). A state can be marked as a **final state** (`is_final_state`), meaning no further workflow transitions can be made from it.
+*   **Transition:** Represents a valid path from one state to another (e.g., the "Approve" transition moves a document from the `In Review` state to the `Active` state).
+*   **TransitionAction:** Represents an automated action that is executed when a specific `Transition` is triggered. Examples include:
+    *   `SEND_NOTIFICATION`: Send an email or UI notification.
+    *   `ASSIGN_TASK`: Create a task for a specific user or group.
+    *   `INDEX_DOCUMENT`: Send the document's content to the search index.
+
+**How to Determine Document Status:**
+
+The frontend determines a document's status via two key API fields:
+1.  **List View (`/api/documents/`):** The `DocumentSerializer` provides a calculated `status` property (e.g., "Active", "In Review") for easy display in lists.
+2.  **Detail View (`/api/versions/{id}/`):** The `DocumentVersionSerializer` nests the full `State` object, which includes the critical `is_final_state` boolean flag. This is the definitive way to know if a document's workflow is complete, allowing the UI to disable further actions.
+
+#### **3.3. API-Driven UI: The "What Can I Do?" and "Do It Now" APIs**
+
+The frontend interacts with the workflow engine using two primary API endpoints.
+
+**1. The "What Can I Do?" API (Discovery)**
+*   **Endpoint:** `GET /api/transitions/?from_state=<id>`
+*   **Purpose:** This read-only endpoint is called by the frontend to discover all available actions for a document in its current state.
+
+**2. The "Do It Now" API (Execution)**
+*   **Endpoint:** `POST /api/versions/{id}/transition/`
+*   **Purpose:** This write endpoint is called when a user clicks one of the dynamically generated action buttons.
+*   **Payload:** `{"transition_id": <id>}`
+
+---
+
+### **[Page 7]**
+
+#### **3.4. Workflow Notifications**
+
+An integral part of the workflow engine is the ability to automatically notify users of important events. This is configured as a `TransitionAction`.
+
+**Admin Configuration:**
+1.  An administrator edits a `Transition` (e.g., "Approve").
+2.  They add a `TransitionAction` of type `SEND_NOTIFICATION`.
+3.  They configure the `parameters` JSON to specify the recipient and message.
+
+**Example: Notifying a Document Owner of Approval**
+
+*   **Parameters Payload:**
+    ```json
+    {
+        "recipient_key": "document_owner",
+        "message": "Your document has been fully approved and is now active!"
+    }
+    ```
+
+**Execution Flow:**
+1.  An approver (Munish) clicks the "Approve" button in the UI.
+2.  The `process_workflow_transition` task is triggered.
+3.  Inside the task, it sees the `SEND_NOTIFICATION` action.
+4.  It queues a `send_notification_task`, passing along the document info and the parameters.
+5.  A Celery worker picks up the notification task, identifies the recipient, renders the template, and sends the notification.
+
+This system ensures that stakeholders are kept informed automatically as a document moves through its lifecycle.
+
+---
+
+### **[Page 8]**
+
+### **4. User Interface (UI) & User Experience (UX) Design**
+
+The GYAIN-KMS frontend is designed to be powerful yet intuitive, translating the complex backend capabilities into a clean, modern, and state-aware user experience.
+
+#### **4.1. The "Knowledge Hub": Main Document Screen**
+
+This is the central library where users browse, search, filter, and perform bulk actions. It uses a responsive three-column layout: **Filters (Left)**, **Content List (Center)**, and **AI Assistant (Right)**.
+
+*   **Left Panel: Filter & Facet Navigator**
+    *   Allows users to narrow down documents by Categories, Document Types, and Tags.
+    *   Populated by `GET` requests to `/api/categories/`, `/api/document_types/`, and `/api/tags/`. Each response includes a `document_count` for faceted filtering.
+
+*   **Center Panel: Document List & Action Area**
+    *   Displays the filtered list of documents in a table or card view.
+    *   Features a prominent search bar and a contextual **Bulk Action Toolbar** that appears when documents are selected.
+    *   Powered by `GET /api/documents/` for listing/filtering and `POST /api/documents/bulk_edit/` for bulk actions.
+
+*   **Right Panel: The AI Assistant**
+    *   An interactive panel for advanced, AI-powered analysis of the currently filtered set of documents.
+    *   *This is detailed further in section 4.4.*
+
+#### **4.2. The "Workspace": Single Document Detail View**
+
+This is where a user interacts with a single document. The design uses **Progressive Disclosure**, adapting the UI based on the document's state.
+
+*   **Case 1: `Draft` State**
+    *   **UI:** A two-panel view (no Outline Navigator). The "Content / OCR" text area is **editable**. The primary action is **[Submit for Review]**.
+*   **Case 2: `In Review` State**
+    *   **UI:** The "Content / OCR" text area becomes **read-only**. Actions dynamically change to **[Approve]** and **[Request Changes]**.
+*   **Case 3: `Active` State**
+    *   **UI:** The **Outline Navigator (Left Panel) appears automatically**, populated by a `GET` call to `/api/versions/{id}/outline/`. The primary action becomes **[Create New Revision]**.
+
+This dynamic behavior is driven by API calls to `/api/versions/{id}/outline/` (to control the navigator's visibility) and `/api/transitions/?from_state={id}` (to populate the action buttons).
+
+---
+
+### **[Page 9]**
+
+#### **4.3. The "Share" Modal: Modern Document Permissions**
+
+GYAIN-KMS features a user-friendly "Share" modal for managing document permissions, powered by the `GET` and `POST` methods on the `/api/documents/{id}/manage_permissions/` endpoint.
+
+**The User Journey for Sharing:**
+1.  **Action:** The document owner clicks the **[Share]** button.
+2.  **API Call:** `GET /api/documents/{id}/manage_permissions/` populates the modal with the current list of users/groups with access.
+3.  **UI Interaction:** The owner searches for a new user, selects a permission level (**"Can view"** or **"Can edit"**), and clicks "Share".
+4.  **API Call:** A `POST` request is sent to the same endpoint. The payload contains the **entire desired state** of the permissions list.
+    ```json
+    {
+        "permissions": {
+            "users": [
+                {"id": 2, "permission": "view"},
+                {"id": 3, "permission": "change"}
+            ],
+            "groups": [
+                {"id": 5, "permission": "view"}
+            ]
+        }
+    }
+    ```
+5.  **Backend Process:** The backend receives the payload, clears all old permissions for the document, and applies the new set using `django-guardian`.
+6.  **UI Response:** The API returns `{"status": "permissions_updated"}` and the modal refreshes.
+
+---
+
+### **[Page 10]**
+
+#### **4.4. The AI Assistant Panel in Detail**
+
+The AI Assistant, located as the right-hand collapsible panel in the **Knowledge Hub**, is the primary interface for leveraging generative AI to perform advanced analysis across multiple documents. It operates on the "working set" of documents currently displayed in the Center Panel, as determined by the user's applied filters.
+
+**Core Purpose:** To transform the document list from a simple file browser into an interactive knowledge base that users can interrogate in natural language.
+
+**UI Components:**
+*   **Header:** Clearly indicates the number of documents in the current working set (e.g., "AI Assistant on 47 Documents").
+*   **Tabbed Interface:** To organize different AI-powered tasks.
+*   **Input Area:** A persistent text area at the bottom for user queries.
+*   **Results Area:** The main body of the panel, where responses are displayed.
+
+---
+
+### **[Page 11]**
+
+**Tab 1: Bulk Q&A (Cross-Document Search)**
+
+This is the default and most powerful tab. It allows users to ask questions and get synthesized answers from the entire set of filtered documents.
+
+*   **User Experience:**
+    1.  A user filters the document list to show all "Master Service Agreements" from the last year.
+    2.  In the Bulk Q&A tab, they type: "Which agreements have a liability cap under $1 million?"
+    3.  They click "Ask".
+*   **UI Display:**
+    *   The results area shows a synthesized answer: "Three agreements have a liability cap under $1 million: Acme Corp MSA, Project Phoenix MSA, and Beta Services Agreement."
+    *   Below the summary, each source document is cited with a direct quote and a link to open the document.
+*   **API/Backend Process (Conceptual):**
+    1.  The frontend sends a request to a dedicated AI endpoint (e.g., `POST /api/ai/query/`).
+    2.  The payload includes the user's `query` and an array of `document_ids` from the current working set.
+    3.  The backend retrieves the text content for these documents and passes them, along with the query, to a Large Language Model (LLM) using a Retrieval-Augmented Generation (RAG) pattern.
+    4.  The API returns the synthesized answer and the structured source citations.
+
+**Tab 2: Summarize**
+
+This tab provides concise summaries of one or more documents.
+
+*   **User Experience:**
+    1.  After filtering to a set of 15 project proposals, the user wants a quick overview.
+    2.  They navigate to the "Summarize" tab.
+    3.  They can either summarize the entire working set or select a few specific documents from the Center Panel.
+*   **UI Display:**
+    *   The results area displays a bulleted list. Each bullet point is a one-sentence summary of a document, prefixed by the document's title (which is a link).
+*   **API/Backend Process (Conceptual):**
+    1.  The API call to `POST /api/ai/summarize/` includes the list of `document_ids`.
+    2.  The backend iterates through each document, sending its content to an LLM with a summarization prompt.
+    3.  The API returns an array of structured summary objects.
+
+**Tab 3: Extract Data**
+
+This tab is for structured data extraction across multiple documents, which is especially useful for financial or legal analysis.
+
+*   **User Experience:**
+    1.  A user has a working set of 50 invoices.
+    2.  In the "Extract Data" tab, they type: "Extract the Invoice Number, Total Amount, and Due Date from these documents."
+*   **UI Display:**
+    *   The results are displayed in a clean, exportable table format with columns for "Source Document", "Invoice Number", "Total Amount", and "Due Date".
+*   **API/Backend Process (Conceptual):**
+    1.  The API call to `POST /api/ai/extract/` includes the `document_ids` and a `prompt` describing the desired data points.
+    2.  The backend uses an LLM with advanced function-calling or data extraction capabilities to process each document.
+    3.  The API returns a structured JSON object that the frontend can easily render as a table.
+
+---
+
+### **[Page 12]**
+
+**(This page is intentionally left blank to ensure the next chapter starts on a new page for readability)**
+
+---
+
+### **[Page 13]**
+
+### **5. Practical Implementation: Scenarios & User Journeys**
+
+#### **5.1. Introduction for the Team**
+
+(Shivani Sharma, Nikhil Chaudhary, Harsh Chhajer)
+
+To fully understand the power and flexibility of the GYAIN-KMS platform, it is essential to review the pre-configured scenarios on the development server (`devdms`). These examples demonstrate how the core features—Ingestion Workflows, OCR Rules, and Lifecycle Workflows—are combined to solve real-world business problems.
+
+Please go through the following scenarios in the Admin Panel. The first task is to understand the complete configuration for each, from the initial trigger to the final state.
+
+#### **5.2. Scenario 1: Automated Invoice Processing via Email**
+
+*   **Goal:** Automatically process PDF invoices sent to an email address, tag them, and place them into a human verification queue.
+*   **Process:** An email containing "invoice" in the subject triggers a `MailRule`. This rule applies an `IngestionAction` that sets the `DocumentType` to `Invoice`, assigns tags, and places the document directly into the "Review Invoice" state of its associated workflow, ready for human approval.
+
+#### **5.3. Scenario 2: Direct Consumption of Identity Documents (Passport/Aadhar)**
+
+*   **Goal:** For uploaded identity documents, automatically assign the correct document type based on content and make them immediately active without a review workflow.
+*   **Process:** An `IngestionTrigger` scans the OCR'd text of a newly uploaded document. If it finds the word "Passport" or "Aadhar", a corresponding `IngestionAction` is applied that sets the correct `DocumentType` and places the document directly into the `Active` state of the default workflow.
+
+---
+
+### **[Page 14]**
+
+#### **5.4. Scenario 3: End-to-End Journey for a Handwritten Medical Prescription**
+
+This is the most comprehensive scenario, demonstrating the full power of the system, including smart OCR routing, human-in-the-loop correction, and a multi-step approval workflow.
+
+*   **Goal:** Accurately digitize, verify, and approve a handwritten medical prescription.
+*   **Admin Setup:** An `OCRRule` is configured to use the "Google Gemini" provider whenever a document with the `DocumentType` "Handwritten Prescription" is ingested. This Document Type is linked to a "Prescription Verification" `LifecycleWorkflow`.
+
+**Phase 1: Ingestion and Initial OCR (Harsh)**
+1.  **Action:** Harsh uploads `prescription_123.jpg` and sets the `DocumentType`.
+2.  **Backend:** The `consume_file` task sees the `OCRRule` match and routes the image to the **Gemini API**. Gemini returns the text, which may contain minor errors (e.g., "Paracetmol"). The system creates a new document version in the `Draft` state.
+
+**Phase 2: OCR Content Review and Correction (Harsh)**
+1.  **Action:** Harsh opens the document in the Workspace view.
+2.  **UI:** He sees the original image next to an **editable** text area containing the incorrect text.
+3.  **Correction:** Harsh corrects "Paracetmol" to "Paracetamol" and clicks "Save Draft". This triggers `PATCH /api/versions/{id}/` to update the `content` field without creating a new version.
+
+**Phase 3: Submitting for Approval (Harsh)**
+1.  **Action:** Harsh clicks **[Submit for Verification]**.
+2.  **Backend:** The `process_workflow_transition` task moves the version's state to `Verification Pending` and assigns a task to the senior pharmacist, Munish.
+
+**Phase 4: Final Approval (Munish)**
+1.  **Action:** Munish opens the task.
+2.  **UI:** He sees the same view, but the corrected text is now in a **read-only** box. The action buttons are now **[Verify & Approve]** and **[Reject & Send Back]**.
+3.  **Approval:** Munish clicks **[Verify & Approve]**.
+4.  **Backend:** The task runs, changes the state to `Verified`, and a `TransitionAction` triggers indexing of the final, correct content for search.
+
+**Final Result:** The document has completed its lifecycle. The data is verified, accurate, and fully searchable, with the entire history captured in the audit log.
+
+---
+
+### **[Page 15]**
+
+**(This page is intentionally left blank to ensure the next chapter starts on a new page for readability)**
+
+---
+
+### **[Page 16]**
+
+### **6. GYAIN-KMS API Reference Guide (Version 2.0)**
+
+#### **6.1. Authentication & Versioning Notes**
+
+*   **Authentication:** All API endpoints require token authentication. Example: `Authorization: Token ...`.
+*   **Versioning Note:** As of June 27, 2025, several legacy endpoints have been removed. Ensure no calls are made to `/api/categorys/` (use `/api/categories/`), `/api/saved_views/`, etc.
+
+#### **6.2. Core Document & Version APIs**
+
+**Document API (`/api/documents/`)**
+*   `GET /api/documents/`: List & filter documents.
+*   `GET /api/documents/{id}/`: Retrieve a single document.
+*   `PATCH /api/documents/{id}/`: Update document metadata.
+*   `DELETE /api/documents/{id}/`: Delete a document.
+*   `GET /api/documents/{id}/versions/`: List historical versions.
+
+**Document Version API (`/api/versions/`)**
+*   `GET /api/versions/{id}/`: Retrieve version details.
+*   `GET /api/versions/{id}/preview/`: Get file for in-browser viewing.
+*   `PATCH /api/versions/{id}/`: **Update OCR/Text Content** for a draft.
+*   `POST /api/versions/{id}/create_revision/`: **Create a New Revision**.
+*   `GET /api/versions/{id}/outline/`: **Get Document Outline**.
+*   `GET/POST /api/versions/{id}/comments/`: Manage comments.
+
+#### **6.3. Ingestion & Bulk Operations APIs**
+
+*   `POST /api/documents/post_document/`: Upload a new document.
+*   `POST /api/documents/bulk_edit/`: Perform a bulk action (`set_category`, `modify_tags`, `delete`, etc.).
+
+#### **6.4. Workflow & State Discovery APIs**
+
+*   `POST /api/versions/{id}/transition/`: **(CRITICAL)** Execute a workflow action. Payload: `{"transition_id": <id>}`.
+*   `GET /api/transitions/?from_state=<id>`: **(CRITICAL)** Get all available actions for a document in a specific state.
+
+#### **6.5. Permissions Management API**
+
+*   `GET/POST /api/documents/{id}/manage_permissions/`: Get or set the complete permissions list for a document.
+
+---
+
+### **[Page 17]**
+
+#### **6.6. Search API (`/api/search/`)**
+
+This endpoint provides powerful full-text search capabilities across all indexed documents, combined with metadata filtering.
+
+| Method | Endpoint | Purpose | Permissions |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/search/` | Perform a full-text search across all accessible and indexed documents. | `documents.view_document` |
+
+**Query Parameters:**
+
+*   `q=<search_term>`: The primary full-text search query string. Supports boolean operators, phrase matching, etc., as provided by the underlying Elasticsearch engine.
+*   `category=<id>`: Filter results to a specific category.
+*   `document_type=<id>`: Filter results to a specific document type.
+*   `tags__id__in=<id1,id2>`: Filter results to documents containing any of the specified tags.
+*   `owner_id=<id>`: Filter by document owner.
+*   `created_after=<YYYY-MM-DD>`: Filter to documents created after a certain date.
+*   `created_before=<YYYY-MM-DD>`: Filter to documents created before a certain date.
+*   `ordering=<-relevance|modified|created>`: Sort results. Defaults to sorting by relevance score.
+
+**Success Response (200 OK):**
+A paginated list of `Document` objects that match the query, similar to the `/api/documents/` endpoint, but potentially with an added `score` field indicating search relevance.
+
+#### **6.7. System, User & Metadata APIs**
+
+*   `GET /api/categories/`: Get categories with document counts.
+*   `GET /api/tags/`: Get tags with document counts.
+*   `GET /api/document_types/`: Get document types with counts.
+*   `GET /api/statistics/`: Get high-level repository statistics.
+*   `GET/POST /api/ui_settings/`: Manage current user's UI settings.
+*   `GET/POST /api/tasks/`, `api/acknowledge_tasks/`: Manage background tasks.
+*   `GET /api/checktask/{task_id}/`: Check status of a specific background task.
+*   `POST /api/terminatetask/{task_id}/`: Request termination of a running task.
+
+---
+
+### **[Page 18]**
+
+**(This page is intentionally left blank to ensure the next chapter starts on a new page for readability)**
+
+---
+
+### **[Page 19]**
+
+### **7. System Administration & Configuration**
+
+The primary interface for configuring the core logic of GYAIN-KMS is the Django Administration panel. This is where administrators define the building blocks of the system's automation and workflow engines.
+
+#### **7.1. Django Administration Panel Overview**
+
+The admin panel is organized into logical sections. The most critical sections for configuration are **Documents** and **Mail Ingestion**.
+
+*   **Documents:** Configure Categories, Document Types, Tags, States, Lifecycle Workflows, Transitions, Ingestion Rules, and OCR Rules.
+*   **Mail Ingestion:** Configure Mail Accounts and Rules for email-based ingestion.
+*   **Authentication and Authorization:** Manage Users and Groups.
+
+#### **7.2. Seeded Top-Level Categories**
+
+The system is seeded with a default set of top-level categories to provide an initial organizational structure.
+
+| Name (`slug`) | Display Name |
+| :--- | :--- |
+| mbot | Gyain AI |
+| home | Home |
+| documents | Documents |
+| dashboards | Dashboards |
+| saved-queries | Saved Queries |
+| notifications | Notifications |
+| ... | ... |
+
+#### **7.3. Admin Setup Guide: Automated Invoice Processing**
+
+*   **Goal:** Emails sent to `payable.invoices@dbalounge.com` with an invoice attachment are automatically classified and put into a human verification queue.
+*   **Summary:** This involves creating a `Lifecycle Workflow` for invoice approval, then creating a `MailRule` that triggers on emails with "invoice" in the subject. The rule applies an `IngestionAction` that assigns the correct metadata and places the new document directly into the "Verification Pending" state of the workflow. The IMAP server is `imappro.zoho.com`, Port `994`, with SSL.
+
+*(For full step-by-step details, refer to the original source material provided.)*
+
+---
+
+### **[Page 20]**
+
+#### **7.4. Admin Setup Guide: Direct Consumption of Identity Docs**
+
+This guide details how to configure the system to automatically classify uploaded Passports and Aadhar cards and make them active without human review. This is a pure `IngestionWorkflow` setup.
+
+**Prerequisites:**
+1.  **DocumentType:** Create two `DocumentType` objects: "Passport" and "Aadhar".
+2.  The default `LifecycleWorkflow` with an "Active" state should exist.
+
+**Step 1: Create the Ingestion Actions (The "THEN" part)**
+1.  Navigate to `/admin/documents/ingestionaction/` and click "Add ingestion action".
+2.  **Action 1: Classify as Passport**
+    *   **Action Name:** `Auto-classify as Passport`
+    *   **Assign this document type:** Select `Passport`.
+    *   **Set Initial Workflow State:** Select `Default: Active`.
+    *   Click Save.
+3.  Click "Add ingestion action" again.
+4.  **Action 2: Classify as Aadhar**
+    *   **Action Name:** `Auto-classify as Aadhar`
+    *   **Assign this document type:** Select `Aadhar`.
+    *   **Set Initial Workflow State:** Select `Default: Active`.
+    *   Click Save.
+
+**Step 2: Create the Ingestion Triggers (The "IF" part)**
+1.  Navigate to `/admin/documents/ingestiontrigger/` and click "Add ingestion trigger".
+2.  **Trigger 1: Detect Passport**
+    *   **Name:** `Content contains "Passport"`
+    *   **Match:** `Passport` (case-insensitive is recommended).
+    *   **Matching algorithm:** `any` (so it triggers if the word appears anywhere).
+    *   Click Save.
+3.  Click "Add ingestion trigger" again.
+4.  **Trigger 2: Detect Aadhar**
+    *   **Name:** `Content contains "Aadhar"`
+    *   **Match:** `Aadhar`.
+    *   **Matching algorithm:** `any`.
+    *   Click Save.
+
+**Step 3: Create the Ingestion Workflows (Link IF and THEN)**
+1.  Navigate to `/admin/documents/ingestionworkflow/` and click "Add ingestion workflow".
+2.  **Workflow 1: Process Passports**
+    *   **Name:** `Process Incoming Passports`
+    *   **Trigger:** Select `Content contains "Passport"`.
+    *   **Action:** Select `Auto-classify as Passport`.
+    *   Click Save.
+3.  Click "Add ingestion workflow" again.
+4.  **Workflow 2: Process Aadhar Cards**
+    *   **Name:** `Process Incoming Aadhar Cards`
+    *   **Trigger:** Select `Content contains "Aadhar"`.
+    *   **Action:** Select `Auto-classify as Aadhar`.
+    *   Click Save.
+
+**Result:** Now, when any document is uploaded and its OCR'd text contains the word "Passport", it will be automatically assigned the correct document type and made active immediately, bypassing any review queues.
+
+---
+
+### **[Page 21]**
+
+#### **7.5. Admin Setup Guide: Handwritten Medical Prescription Workflow**
+
+This guide details the complete setup for the complex medical prescription scenario, combining OCR Rules, a custom Lifecycle Workflow, and an Ingestion Workflow.
+
+**Prerequisites:**
+1.  **Group:** A group named "Senior Pharmacists" exists, with user "Munish" as a member.
+2.  **OCR Provider:** The `Google Gemini` provider is configured in `OCR Provider Settings`.
+
+**Phase 1: Configure the Core Components**
+1.  **DocumentType:** Create a `DocumentType` named "Handwritten Prescription".
+2.  **OCRRule:** Navigate to `/admin/documents/ocrrule/`.
+    *   **Name:** `Use Gemini for Handwritten Prescriptions`
+    *   **Provider:** Select `Google Gemini`.
+    *   In the `Document types` condition, select `Handwritten Prescription`.
+    *   Click Save.
+
+**Phase 2: Configure the Document Lifecycle (The Human Process)**
+1.  **Create Lifecycle Workflow:** In `/admin/documents/workflow/`, create a workflow named "Prescription Verification" and link it to the `Handwritten Prescription` Document Type.
+2.  **Define States:** Add three states to this workflow: `Draft`, `Verification Pending`, and `Verified` (mark this one as `is_final_state`).
+3.  **Define Transitions & Actions:**
+    *   Navigate to the `Draft` state's admin page. Add a transition:
+        *   **Name:** `Submit for Verification`
+        *   **To State:** `Verification Pending`
+        *   **Action:** Add a `TransitionAction` of type `ASSIGN_TASK`.
+        *   **Parameters:** `{"assignee_group_name": "Senior Pharmacists", "task_description": "Please verify this corrected prescription."}`
+    *   Navigate to the `Verification Pending` state's admin page. Add two transitions:
+        *   **Transition 1:** `Verify & Approve` (To State: `Verified`). Add an action of type `INDEX_DOCUMENT`.
+        *   **Transition 2:** `Reject & Send Back` (To State: `Draft`).
+    *   Click Save on all changes.
+
+**Phase 3: Configure Ingestion (The Robot Process)**
+1.  **Create IngestionAction:**
+    *   **Action Name:** `Classify as Prescription and Start Verification`
+    *   **Assign this document type:** `Handwritten Prescription`.
+    *   **Set Initial Workflow State:** `Prescription Verification: Draft`. (It's crucial to start in `Draft` to allow for OCR correction).
+2.  **Create IngestionTrigger:**
+    *   **Name:** `Filename contains "prescription"`
+    *   **Filter filename:** `*prescription*` (use wildcards).
+    *   **Matching algorithm:** `wildcard`.
+3.  **Create IngestionWorkflow:**
+    *   **Name:** `Process Uploaded Prescriptions`
+    *   **Trigger:** Select `Filename contains "prescription"`.
+    *   **Action:** Select `Classify as Prescription and Start Verification`.
+
+**Configuration Complete:** The system is now fully configured. When a user uploads a file named `dr_smith_prescription_jan25.jpg`, it will be automatically classified, sent to Gemini for OCR, and placed in the `Draft` state of the verification workflow, ready for Harsh to perform the human-in-the-loop correction step.
+
+---
+
+### **[Page 22]**
+
+**(This page is intentionally left blank to ensure the next chapter starts on a new page for readability)**
+
+---
+
+### **[Page 23]**
+
+### **8. Platform Policies & Guidelines**
+
+The GYAIN-KMS platform incorporates powerful technologies, including generative AI. All users and administrators must adhere to the following policies to ensure responsible, secure, and compliant usage.
+
+#### **8.1. Responsible AI and Generative Feature Usage**
+
+Certain services within GYAIN-KMS, particularly the **AI Assistant Panel**, offer experimental access to features powered by generative AI technology (e.g., Google Gemini).
+
+*   **Use Responsibly:** Generative AI is a powerful tool for productivity but is not infallible. Users should treat AI-generated summaries, answers, and data extractions as a "first draft" or an "intelligent assistant."
+*   **Verification is Required:** All information generated by the AI for critical business processes **must be verified** against the source documents by a human user before being acted upon. The platform facilitates this with its side-by-side viewer and source citation features.
+*   **No Sensitive Personal Data in Prompts:** Users should not include sensitive personal information (SPI), personally identifiable information (PII), or confidential company secrets in free-form text prompts beyond what is already contained within the documents being analyzed. The system is designed to operate on document content, not on arbitrary user-inputted data.
+
+#### **8.2. Data Privacy and Security**
+
+*   **Permissions are Paramount:** The security of the system relies on the correct configuration of document permissions. The "Share" modal provides a clear interface for this. Document owners are responsible for ensuring their documents are shared only with the appropriate users and groups.
+*   **Audit Trail:** All significant actions, including document access, permission changes, and workflow transitions, are logged in the system's audit trail. This log is immutable and serves as the record of truth for compliance and security investigations.
+*   **Authentication:** All access to the system, via the UI or API, requires a valid authentication token. These tokens should be treated as sensitive credentials and protected accordingly.
+
+---
+
+### **[Page 24]**
+
+### **Appendices**
+
+#### **Appendix A: Database Schema Snippets**
+
+Below are the schema definitions for the core document models, providing insight into the underlying data structure.
+
+**Table: `documents_document` (The Document Container)**
+```
+       Column       |          Type          | Nullable
+--------------------+------------------------+----------
+ id                 | integer                | not null
+ title              | character varying(128) | not null
+ created            | timestamp with time zone| not null
+ modified           | timestamp with time zone| not null
+ category_id        | integer                |
+ document_type_id   | integer                |
+ owner_id           | integer                |
+ confidential       | boolean                | not null
+ active_version_id  | integer                |
+ latest_version_id  | integer                |
+```
+
+**Table: `documents_documentversion` (The Immutable Version)**
+```
+      Column       |          Type          | Nullable
+-------------------+------------------------+----------
+ id                | integer                | not null
+ version_major     | integer                | not null
+ version_minor     | integer                | not null
+ content           | text                   | not null
+ mime_type         | character varying(256) | not null
+ filename          | character varying(100) | not null
+ checksum          | character varying(64)  | not null
+ created_at        | timestamp with time zone| not null
+ document_id       | integer                | not null
+ state_id          | integer                |
+```
+
+#### **Appendix B: Frontend Conceptual Code**
+
+**Conceptual Angular Logic for Permissions Modal (`share-modal.component.ts`)**
+```typescript
+// share-modal.component.ts
+shareWithUser(user, permissionLevel) {
+  const newUserPermission = { id: user.id, username: user.username, permission: permissionLevel };
+  this.currentPermissions.users.push(newUserPermission);
+  this.apiService.updatePermissions(this.documentId, this.currentPermissions).subscribe(...);
+}
+```
+
+**Conceptual Angular Logic for Dynamic UI based on Document State**
+```typescript
+// document-detail.component.ts
+updateUiBasedOnState() {
+  if (!this.currentVersion?.state) { return; }
+  if (this.currentVersion.state.is_final_state) {
+    this.availableTransitions = []; // No more actions
+  } else {
+    this.apiService.getTransitions(this.currentVersion.state.id).subscribe(transitions => {
+      this.availableTransitions = transitions;
+    });
+  }
+}
+```
